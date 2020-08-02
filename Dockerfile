@@ -2,13 +2,25 @@ FROM ls12styler/dind:19.03.9
 
 # Install basics (HAVE to install bash for tpm to work)
 RUN apk update && apk add -U --no-cache \
-    bash zsh git git-perl neovim less curl bind-tools \
-    man build-base su-exec shadow openssh-client
+    bash zsh git git-perl neovim vim-gtk less curl bind-tools \
+    man build-base su-exec shadow openssh-client \
+    gpg unzip rsync htop shellcheck ripgrep pass python3-pip
+
+RUN apt-get install -y --force-yes \
+    autoconf bison build-essential libssl-dev libyaml-dev \ 
+    libreadline5-dev zlib1g-dev libncurses5-dev libffi-dev libgdbm6 libgdbm-dev libdb-dev
+
+RUN apt-get install -y --force-yes \
+    libncurses5-dev libgnome2-dev libgnomeui-dev \
+    libgtk2.0-dev libatk1.0-dev libbonoboui2-dev \
+    libcairo2-dev libx11-dev libxpm-dev libxt-dev python-dev \
+    python3-dev ruby-dev lua5.1 lua5.1-dev libperl-dev ctags \
+    git curl make cmake gcc clang openssh-server
 
 # Set Timezone
 RUN apk add tzdata && \
-    cp /usr/share/zoneinfo/Europe/London /etc/localtime && \
-    echo "Europe/London" > /etc/timezone && \
+    cp /usr/share/zoneinfo/Asia/Shanghai /etc/localtime && \
+    echo "Asia/Shanghai" > /etc/timezone && \
     apk del tzdata
 
 ENV HOME /home/me
@@ -20,22 +32,13 @@ COPY --from=ls12styler/tmux:3.1b /usr/local/bin/tmux /usr/local/bin/tmux
 RUN wget https://github.com/stedolan/jq/releases/download/jq-1.6/jq-linux64 -O /bin/jq && chmod +x /bin/jq
 
 # Configure text editor - vim!
-RUN curl -fLo ${HOME}/.config/nvim/autoload/plug.vim --create-dirs https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
+# RUN curl -fLo ${HOME}/.config/nvim/autoload/plug.vim --create-dirs https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
+RUN curl -fLo ${HOME}/.vim/autoload/plug.vim --create-dirs https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
 # Consult the vimrc file to see what's installed
-COPY vimrc ${HOME}/.config/nvim/init.vim
-# Clone the git repos of Vim plugins
-WORKDIR ${HOME}/.config/nvim/plugged/
-RUN git clone --depth=1 https://github.com/ctrlpvim/ctrlp.vim && \
-    git clone --depth=1 https://github.com/tpope/vim-fugitive && \
-    git clone --depth=1 https://github.com/godlygeek/tabular && \
-    git clone --depth=1 https://github.com/plasticboy/vim-markdown && \
-    git clone --depth=1 https://github.com/vim-airline/vim-airline && \
-    git clone --depth=1 https://github.com/vim-airline/vim-airline-themes && \
-    git clone --depth=1 https://github.com/vim-syntastic/syntastic && \
-    git clone --depth=1 https://github.com/frazrepo/vim-rainbow && \
-    git clone --depth=1 https://github.com/airblade/vim-gitgutter && \
-    git clone --depth=1 https://github.com/derekwyatt/vim-scala && \
-    git clone --depth=1 https://github.com/hashivim/vim-terraform.git
+COPY .vimrc ${HOME}/.vimrc
+
+# RUN vim +PlugInstall +q +q
+RUN timeout 20m vim +PlugInstall +qall || true
 
 # In the entrypoint, we'll create a user called `me`
 WORKDIR ${HOME}
@@ -46,16 +49,48 @@ ENV SHELL /bin/zsh
 RUN wget https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh -O - | zsh || true
 RUN wget https://gist.githubusercontent.com/xfanwu/18fd7c24360c68bab884/raw/f09340ac2b0ca790b6059695de0873da8ca0c5e5/xxf.zsh-theme -O ${HOME}/.oh-my-zsh/custom/themes/xxf.zsh-theme
 RUN git clone https://github.com/zsh-users/zsh-autosuggestions ${HOME}/.oh-my-zsh/plugins/zsh-autosuggestions
+RUN git clone https://github.com/zsh-users/zsh-syntax-highlighting.git ${HOME}/.oh-my-zsh/plugins/zsh-syntax-highlighting
+
+# Install FZF (fuzzy finder on the terminal and used by a Vim plugin).
+RUN git clone --depth 1 https://github.com/junegunn/fzf.git ${HOME}/.fzf 
+RUN ${HOME}}/.fzf/install
+
 # Copy ZSh config
-COPY zshrc ${HOME}/.zshrc
+COPY .zshrc ${HOME}/.zshrc
+
+COPY .profile ${HOME}/.profile
+COPY .bashrc ${HOME}/.bashrc
+COPY .aliases ${HOME}/.aliases
+COPY .gemrc ${HOME}/.gemrc
+COPY ./etc/wsl.conf /etc/wsl.conf
 
 # Install TMUX
-COPY tmux.conf ${HOME}/.tmux.conf
+COPY .tmux.conf ${HOME}/.tmux.conf
 RUN git clone https://github.com/tmux-plugins/tpm ${HOME}/.tmux/plugins/tpm && \
     ${HOME}/.tmux/plugins/tpm/bin/install_plugins
 
 # Copy git config over
-COPY gitconfig ${HOME}/.gitconfig
+COPY .gitconfig ${HOME}/.gitconfig
+COPY .gitconfig.user ${HOME}/.gitconfig.user
+
+
+# Install ASDF (version manager which I use for non-Dockerized apps).
+RUN git clone https://github.com/asdf-vm/asdf.git ${HOME}/.asdf --branch v0.7.8
+RUN source ${$HOME}/.asdf/asdf.sh
+
+# Install Node through ASDF.
+RUN asdf plugin-add nodejs https://github.com/asdf-vm/asdf-nodejs.git
+RUN bash ${HOME}/.asdf/plugins/nodejs/bin/import-release-team-keyring
+RUN asdf install nodejs 12.17.0
+RUN asdf global nodejs 12.17.0
+
+# Install Ruby through ASDF.
+RUN asdf plugin-add ruby https://github.com/asdf-vm/asdf-ruby.git
+RUN asdf install ruby 2.7.1
+RUN asdf global ruby 2.7.1
+
+# Install Ansible.
+RUN pip3 install --user ansible
 
 # Entrypoint script creates a user called `me` and `chown`s everything
 COPY entrypoint.sh /bin/entrypoint.sh
