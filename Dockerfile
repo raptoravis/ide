@@ -76,7 +76,7 @@ COPY .gitconfig.user ${HOME}/.gitconfig.user
 
 # Install ASDF (version manager which I use for non-Dockerized apps).
 RUN git clone https://github.com/asdf-vm/asdf.git ${HOME}/.asdf --branch v0.7.8
-RUN bash ${$HOME}/.asdf/asdf.sh
+RUN bash -c "source ${$HOME}/.asdf/asdf.sh"
 
 # Install Node through ASDF.
 RUN asdf plugin-add nodejs https://github.com/asdf-vm/asdf-nodejs.git
