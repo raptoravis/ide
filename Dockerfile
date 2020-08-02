@@ -3,8 +3,8 @@ FROM ubuntu:20.04
 
 # Install basics (HAVE to install bash for tpm to work)
 RUN apt-get update && apt-get install -y --force-yes \
-    bash zsh git git-perl neovim vim-gtk tmux less curl bind-tools \
-    man build-base su-exec shadow openssh-client 
+    bash zsh git neovim vim-gtk tmux less curl bind-tools \
+    man build-essential shadow openssh-client 
     
 RUN apt-get install -y --force-yes \
     gpg unzip rsync htop shellcheck ripgrep pass python3-pip
