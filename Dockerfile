@@ -1,9 +1,12 @@
-FROM ls12styler/dind:19.03.9
+# FROM ls12styler/dind:19.03.9
+FROM ubuntu:20.04 
 
 # Install basics (HAVE to install bash for tpm to work)
-RUN apk update && apk add -U --no-cache \
-    bash zsh git git-perl neovim vim-gtk less curl bind-tools \
-    man build-base su-exec shadow openssh-client \
+RUN apt-get update && apt-get install -y --force-yes \
+    bash zsh git git-perl neovim vim-gtk tmux less curl bind-tools \
+    man build-base su-exec shadow openssh-client 
+    
+RUN apt-get install -y --force-yes \
     gpg unzip rsync htop shellcheck ripgrep pass python3-pip
 
 RUN apt-get install -y --force-yes \
@@ -26,7 +29,7 @@ RUN apk add tzdata && \
 ENV HOME /home/me
 
 # Install tmux
-COPY --from=ls12styler/tmux:3.1b /usr/local/bin/tmux /usr/local/bin/tmux
+# COPY --from=ls12styler/tmux:3.1b /usr/local/bin/tmux /usr/local/bin/tmux
 
 # Install jQ!
 RUN wget https://github.com/stedolan/jq/releases/download/jq-1.6/jq-linux64 -O /bin/jq && chmod +x /bin/jq
