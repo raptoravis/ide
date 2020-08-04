@@ -42,7 +42,7 @@ RUN curl -fLo ${HOME}/.vim/autoload/plug.vim --create-dirs https://raw.githubuse
 COPY .vimrc ${HOME}/.vimrc
 
 # RUN vim +PlugInstall +q +q
-RUN timeout 20m vim +PlugInstall +qall || true
+# RUN timeout 20m vim +PlugInstall +qall || true
 
 # In the entrypoint, we'll create a user called `me`
 WORKDIR ${HOME}
@@ -51,13 +51,13 @@ WORKDIR ${HOME}
 ENV SHELL /bin/zsh
 # Install oh-my-zsh
 RUN wget https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh -O - | zsh || true
-RUN wget https://gist.githubusercontent.com/xfanwu/18fd7c24360c68bab884/raw/f09340ac2b0ca790b6059695de0873da8ca0c5e5/xxf.zsh-theme -O ${HOME}/.oh-my-zsh/custom/themes/xxf.zsh-theme
+# RUN wget https://gist.githubusercontent.com/xfanwu/18fd7c24360c68bab884/raw/f09340ac2b0ca790b6059695de0873da8ca0c5e5/xxf.zsh-theme -O ${HOME}/.oh-my-zsh/custom/themes/xxf.zsh-theme
 RUN git clone https://github.com/zsh-users/zsh-autosuggestions ${HOME}/.oh-my-zsh/plugins/zsh-autosuggestions
 RUN git clone https://github.com/zsh-users/zsh-syntax-highlighting.git ${HOME}/.oh-my-zsh/plugins/zsh-syntax-highlighting
 
 # Install FZF (fuzzy finder on the terminal and used by a Vim plugin).
 RUN git clone --depth 1 https://github.com/junegunn/fzf.git ${HOME}/.fzf 
-RUN ${HOME}}/.fzf/install
+RUN ${HOME}/.fzf/install || true
 
 # Copy ZSh config
 COPY .zshrc ${HOME}/.zshrc
@@ -70,8 +70,7 @@ COPY ./etc/wsl.conf /etc/wsl.conf
 
 # Install TMUX
 COPY .tmux.conf ${HOME}/.tmux.conf
-RUN git clone https://github.com/tmux-plugins/tpm ${HOME}/.tmux/plugins/tpm && \
-    ${HOME}/.tmux/plugins/tpm/bin/install_plugins
+RUN git clone https://github.com/tmux-plugins/tpm ${HOME}/.tmux/plugins/tpm
 
 # Copy git config over
 COPY .gitconfig ${HOME}/.gitconfig
@@ -80,21 +79,23 @@ COPY .gitconfig.user ${HOME}/.gitconfig.user
 
 # Install ASDF (version manager which I use for non-Dockerized apps).
 RUN git clone https://github.com/asdf-vm/asdf.git ${HOME}/.asdf --branch v0.7.8
-RUN bash -c "source ${$HOME}/.asdf/asdf.sh"
+# RUN bash -c "source ${$HOME}/.asdf/asdf.sh"
+# RUN ${$HOME}/.asdf/asdf.sh
+# RUN bash . ${$HOME}/.asdf/asdf.sh
 
 # Install Node through ASDF.
-RUN asdf plugin-add nodejs https://github.com/asdf-vm/asdf-nodejs.git
-RUN bash ${HOME}/.asdf/plugins/nodejs/bin/import-release-team-keyring
-RUN asdf install nodejs 12.17.0
-RUN asdf global nodejs 12.17.0
+# RUN asdf plugin-add nodejs https://github.com/asdf-vm/asdf-nodejs.git
+# RUN bash ${HOME}/.asdf/plugins/nodejs/bin/import-release-team-keyring
+# RUN asdf install nodejs 12.17.0
+# RUN asdf global nodejs 12.17.0
 
 # Install Ruby through ASDF.
-RUN asdf plugin-add ruby https://github.com/asdf-vm/asdf-ruby.git
-RUN asdf install ruby 2.7.1
-RUN asdf global ruby 2.7.1
+# RUN asdf plugin-add ruby https://github.com/asdf-vm/asdf-ruby.git
+# RUN asdf install ruby 2.7.1
+# RUN asdf global ruby 2.7.1
 
 # Install Ansible.
-RUN pip3 install --user ansible
+# RUN pip3 install --user ansible
 
 # Entrypoint script creates a user called `me` and `chown`s everything
 COPY entrypoint.sh /bin/entrypoint.sh
