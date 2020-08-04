@@ -6,7 +6,7 @@ ENV DEBIAN_FRONTEND=noninteractive
 # Install basics (HAVE to install bash for tpm to work)
 RUN apt-get update && apt-get install -y --force-yes \
     bash zsh git neovim vim-gtk tmux less curl \
-    man build-essential openssh-client 
+    man build-essential openssh-client su-exec 
     
 RUN apt-get install -y --force-yes \
     gpg unzip rsync htop shellcheck ripgrep pass python3-pip
@@ -23,18 +23,18 @@ RUN apt-get install -y --force-yes \
     git curl make cmake gcc clang openssh-server
 
 # Install latest su-exec
-RUN  set -ex; \
-     curl -fLo /usr/local/bin/su-exec.c --create-dirs https://raw.githubusercontent.com/ncopa/su-exec/master/su-exec.c; \
-     fetch_deps='gcc libc-dev'; \
-     apt-get update; \
-     apt-get install -y --no-install-recommends $fetch_deps; \
-     rm -rf /var/lib/apt/lists/*; \
-     gcc -Wall \
-         /usr/local/bin/su-exec.c -o/usr/local/bin/su-exec; \
-     chown root:root /usr/local/bin/su-exec; \
-     chmod 0755 /usr/local/bin/su-exec; \
-     rm /usr/local/bin/su-exec.c; \
-     apt-get purge -y --auto-remove $fetch_deps
+# RUN  set -ex; \
+#      curl -fLo /usr/local/bin/su-exec.c --create-dirs https://raw.githubusercontent.com/ncopa/su-exec/master/su-exec.c; \
+#      fetch_deps='gcc libc-dev'; \
+#      apt-get update; \
+#      apt-get install -y --no-install-recommends $fetch_deps; \
+#      rm -rf /var/lib/apt/lists/*; \
+#      gcc -Wall \
+#          /usr/local/bin/su-exec.c -o/usr/local/bin/su-exec; \
+#      chown root:root /usr/local/bin/su-exec; \
+#      chmod 0755 /usr/local/bin/su-exec; \
+#      rm /usr/local/bin/su-exec.c; \
+#      apt-get purge -y --auto-remove $fetch_deps
 
 # Set Timezone
 ENV TZ=Asia/Shanghai
