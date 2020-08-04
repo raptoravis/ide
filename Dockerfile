@@ -78,7 +78,7 @@ COPY .gitconfig.user ${HOME}/.gitconfig.user
 
 
 # Install ASDF (version manager which I use for non-Dockerized apps).
-RUN git clone https://github.com/asdf-vm/asdf.git ${HOME}/.asdf --branch v0.7.8
+# RUN git clone https://github.com/asdf-vm/asdf.git ${HOME}/.asdf --branch v0.7.8
 # RUN bash -c "source ${$HOME}/.asdf/asdf.sh"
 # RUN ${$HOME}/.asdf/asdf.sh
 # RUN bash . ${$HOME}/.asdf/asdf.sh
