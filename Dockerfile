@@ -1,45 +1,34 @@
 # FROM ls12styler/dind:19.03.9
-FROM ubuntu:20.04 
+# FROM ubuntu:20.04 
+FROM alpine:3.12
 
 ENV DEBIAN_FRONTEND=noninteractive
 
 # Install basics (HAVE to install bash for tpm to work)
-RUN apt-get update && apt-get install -y --force-yes \
-    bash zsh git neovim vim-gtk tmux less curl \
-    man build-essential openssh-client su-exec 
+RUN apk update && apk install -y --force-yes \
+    bash zsh git neovim vim-gtk tmux less curl bind-tools \
+    man build-base su-exec shadow openssh-client
     
-RUN apt-get install -y --force-yes \
+RUN apk install -y --force-yes \
     gpg unzip rsync htop shellcheck ripgrep pass python3-pip
 
-RUN apt-get install -y --force-yes \
+RUN apk install -y --force-yes \
     autoconf bison build-essential libssl-dev libyaml-dev \ 
     zlib1g-dev libncurses5-dev libffi-dev libgdbm6 libgdbm-dev 
 
-RUN apt-get install -y --force-yes \
+RUN apk install -y --force-yes \
     libncurses5-dev \
     libgtk2.0-dev libatk1.0-dev \
     libcairo2-dev libx11-dev libxpm-dev libxt-dev python-dev \
     python3-dev ruby-dev lua5.1 lua5.1-dev libperl-dev ctags \
     git curl make cmake gcc clang openssh-server
 
-# Install latest su-exec
-# RUN  set -ex; \
-#      curl -fLo /usr/local/bin/su-exec.c --create-dirs https://raw.githubusercontent.com/ncopa/su-exec/master/su-exec.c; \
-#      fetch_deps='gcc libc-dev'; \
-#      apt-get update; \
-#      apt-get install -y --no-install-recommends $fetch_deps; \
-#      rm -rf /var/lib/apt/lists/*; \
-#      gcc -Wall \
-#          /usr/local/bin/su-exec.c -o/usr/local/bin/su-exec; \
-#      chown root:root /usr/local/bin/su-exec; \
-#      chmod 0755 /usr/local/bin/su-exec; \
-#      rm /usr/local/bin/su-exec.c; \
-#      apt-get purge -y --auto-remove $fetch_deps
-
 # Set Timezone
 ENV TZ=Asia/Shanghai
-RUN cp /usr/share/zoneinfo/$TZ /etc/localtime && \
-    echo "Asia/Shanghai" > /etc/timezone 
+RUN apk add tzdata && \
+	cp /usr/share/zoneinfo/$TZ /etc/localtime && \
+    echo "Asia/Shanghai" > /etc/timezone \
+	apk del tzdata
 
 ENV HOME /home/me
 
